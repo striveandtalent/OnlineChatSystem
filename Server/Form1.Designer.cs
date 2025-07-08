@@ -82,7 +82,7 @@
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(147, 41);
             this.btnStart.TabIndex = 4;
-            this.btnStart.Text = "连接";
+            this.btnStart.Text = "开始监听";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
@@ -164,6 +164,7 @@
             this.btnZD.TabIndex = 13;
             this.btnZD.Text = "震动";
             this.btnZD.UseVisualStyleBackColor = true;
+            this.btnZD.Click += new System.EventHandler(this.btnZD_Click);
             // 
             // Form1
             // 

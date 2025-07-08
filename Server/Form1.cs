@@ -50,13 +50,14 @@ namespace Server
         private async void Listen(object obj)
         {
             Socket socketWatch = obj as Socket;
-            try
+            while (true)
             {
-                while (true)
+                try
                 {
                     Socket socketSend = socketWatch.Accept();
-                    dicSocket.Add(socketWatch.RemoteEndPoint.ToString(), socketSend);
+                    dicSocket.Add(socketSend.RemoteEndPoint.ToString(), socketSend);
                     cboUsers.Items.Add(socketSend.RemoteEndPoint.ToString());
+                    cboUsers.SelectedItem = socketSend.RemoteEndPoint.ToString();
                     ShowMsg($"{socketSend.RemoteEndPoint}连接成功!");
                     await Task.Run(() =>
                     {
@@ -65,20 +66,21 @@ namespace Server
                         th.Start(socketSend);
                     });
                 }
-            }
-            catch (Exception ex)
-            {
-                ShowMsg(ex.Message);
+                catch (Exception ex)
+                {
+                    ShowMsg(ex.Message);
+                }
             }
         }
 
+
         private void Receive(object obj)
         {
-            StringBuilder sb = new StringBuilder();
             Socket socketSend = obj as Socket;
-            try
+
+            while (true)
             {
-                while (true)
+                try
                 {
                     byte[] buffer = new byte[1024 * 1024 * 5];
                     int r = socketSend.Receive(buffer);
@@ -86,13 +88,13 @@ namespace Server
                     {
                         break;
                     }
-                    sb.Append(Encoding.UTF8.GetString(buffer), 0, r);
+                    string str = Encoding.UTF8.GetString(buffer, 0, r);
+                    ShowMsg($"{socketSend.RemoteEndPoint}:{str}");
                 }
-                ShowMsg(sb.ToString());
-            }
-            catch (Exception ex)
-            {
-                ShowMsg(ex.Message);
+                catch (Exception ex)
+                {
+                    ShowMsg(ex.Message);
+                }
             }
         }
 
@@ -110,18 +112,13 @@ namespace Server
                     string str = txtMsg.Text.Trim();
                     byte[] buffer = Encoding.UTF8.GetBytes(str);
                     List<byte> list = new List<byte>();
-                    list.Add(0);//文字标识
+                    list.Add(0);//文件标识
                     list.AddRange(buffer);
                     byte[] newBuffer = list.ToArray();
-                    int r = dicSocket[cboUsers.SelectedItem.ToString()].Send(newBuffer);
-                    if (r != 0)
-                    {
-                        ShowMsg($"{dicSocket[cboUsers.SelectedItem.ToString()].LocalEndPoint}:{str}");
-                    }
-                    else
-                    {
-                        ShowMsg("发送失败!");
-                    }
+                    string ip = cboUsers.SelectedItem.ToString();
+                    dicSocket[ip].Send(newBuffer);
+                    ShowMsg($"{dicSocket[ip].LocalEndPoint}:{str}");
+                    txtMsg.Clear();
                 }
                 else
                 {
@@ -130,6 +127,7 @@ namespace Server
             }
             catch (Exception ex)
             {
+                txtMsg.Clear();
                 ShowMsg(ex.Message);
             }
         }
@@ -157,6 +155,10 @@ namespace Server
                         List<byte> list = new List<byte>();
                         list.Add(1);//文件类型
                         list.AddRange(buffer);
+                        byte[] newBuffer = list.ToArray();
+                        string ip = cboUsers.SelectedItem.ToString();
+                        dicSocket[ip].Send(newBuffer);
+                        ShowMsg($"{dicSocket[ip].LocalEndPoint}:文件发送成功!");
                     }
                 }
                 catch
@@ -164,9 +166,18 @@ namespace Server
                     ShowMsg("未选择文件");
                 }
             }
-            else {
+            else
+            {
                 ShowMsg("未选择客户端");
             }
+        }
+
+        private void btnZD_Click(object sender, EventArgs e)
+        {
+            byte[] buffer = new byte[1] { 2 };
+            string ip = cboUsers.SelectedItem.ToString();
+            dicSocket[ip].Send(buffer);
+            ShowMsg($"{dicSocket[ip].LocalEndPoint}震动发送成功!");
         }
     }
 }
