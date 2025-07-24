@@ -58,7 +58,7 @@ namespace Server
                     dicSocket.Add(socketSend.RemoteEndPoint.ToString(), socketSend);
                     cboUsers.Items.Add(socketSend.RemoteEndPoint.ToString());
                     cboUsers.SelectedItem = socketSend.RemoteEndPoint.ToString();
-                    ShowMsg($"{socketSend.RemoteEndPoint}::连接成功!");
+                    ShowMsg($"{socketSend.RemoteEndPoint}:::连接成功!");
                     await Task.Run(() =>
                     {
                         Thread th = new Thread(Receive);
